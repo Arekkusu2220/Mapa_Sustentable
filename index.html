@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dónde reciclar cerca del Tec de Nuevo León</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+:root{--bg:#eef3f1;--panel:#fff;--ink:#14302b;--muted:#587069;--accent:#0f766e;--line:#d3dfdb;--chip:#e2ece8}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1a18;--panel:#162623;--ink:#e6f0ed;--muted:#93aaa3;--accent:#4fc3b5;--line:#2a3f3b;--chip:#1f332f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2{font-family:"Bricolage Grotesque",system-ui,sans-serif;margin:0;line-height:1.15}
+header{padding:20px 20px 12px;max-width:1200px;margin:0 auto}
+h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700}
+header p{margin:6px 0 0;color:var(--muted);max-width:60ch}
+.filters{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 14px;max-width:1200px;margin:0 auto}
+.chip{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:6px 14px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chip:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+main{display:grid;grid-template-columns:1fr 360px;gap:16px;padding:0 20px 28px;max-width:1200px;margin:0 auto}
+#map{height:70vh;min-height:420px;border-radius:10px;border:1px solid var(--line)}
+aside{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;max-height:70vh;overflow:auto}
+aside h2{font-size:1.1rem;margin-bottom:8px}
+.site{border-top:1px solid var(--line);padding:10px 0;cursor:pointer}
+.site:first-of-type{border-top:0}
+.site h3{margin:0;font-size:1rem}
+.site small{color:var(--muted);display:block}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.tags span{background:var(--chip);border-radius:6px;padding:1px 8px;font-size:.8rem}
+.empty{color:var(--muted)}
+#admin{display:none;max-width:1200px;margin:0 auto 32px;padding:0 20px}
+#admin .box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+#admin form{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+label{display:block;font-size:.9rem;font-weight:600}
+input,select,textarea{width:100%;font:inherit;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.wide{grid-column:1/-1}
+.checks{display:flex;flex-wrap:wrap;gap:6px 14px;font-weight:400}
+.checks label{font-weight:400;display:flex;gap:6px;align-items:center}
+.checks input{width:auto}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:9px 16px;font:inherit;font-weight:600;cursor:pointer}
+.btn.alt{background:var(--chip);color:var(--ink)}
+@media(max-width:820px){main{grid-template-columns:1fr}#map{height:55vh}aside{max-height:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Dónde reciclar cerca del Tec de Nuevo León</h1>
+  <p>Centros de acopio, puntos limpios y botes de reciclaje en un radio de 5 km. Elige un tipo de residuo para ver dónde llevarlo.</p>
+</header>
+<div class="filters" id="filters" role="group" aria-label="Filtrar por residuo"></div>
+<div class="filters"><button class="btn" id="addBtn" type="button" aria-expanded="false" aria-controls="admin">+ Agregar un punto de reciclaje o basura</button></div>
+<main>
+  <div id="map" role="application" aria-label="Mapa de sitios de reciclaje"></div>
+  <aside aria-live="polite"><h2 id="count"></h2><div id="list"></div></aside>
+</main>
+
+<section id="admin">
+  <div class="box">
+    <h2>Agregar un punto</h2>
+    <p class="empty" id="nota">Haz clic en el mapa donde está el sitio y llena los datos. Los puntos que agregues se guardan en este navegador.</p>
+    <form id="form">
+      <label>Nombre<input name="nombre" required></label>
+      <label>Tipo<select name="tipo"></select></label>
+      <label>Ubicación (clic en el mapa)<input name="coords" readonly required placeholder="Sin ubicación"></label>
+      <label>Dirección o referencia<input name="direccion" placeholder="Ej. junto a la biblioteca"></label>
+      <label>Horario<input name="horario"></label>
+      <label>Teléfono o sitio web<input name="contacto"></label>
+      <div class="wide"><label>Residuos que acepta</label><div class="checks" id="checks"></div></div>
+      <label class="wide">Notas<textarea name="notas" rows="2"></textarea></label>
+      <label>Última verificación<input type="date" name="verificado"></label>
+      <div class="wide"><button class="btn" type="submit">Guardar punto</button> <button class="btn alt" type="button" id="export">Exportar puntos</button></div>
+    </form>
+    <textarea id="out" rows="6" class="wide" style="margin-top:12px;display:none" readonly></textarea>
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* Pega aquí la configuración de tu proyecto de Firebase (ver instrucciones). Mientras sea null, los puntos se guardan solo en el navegador. */
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyCy0EFgApvFkZE94yaKyc5rhGL6xtJIL4o",
+  authDomain:"desarrollo-sustentable-52b32.firebaseapp.com",
+  projectId:"desarrollo-sustentable-52b32",
+  storageBucket:"desarrollo-sustentable-52b32.firebasestorage.app",
+  messagingSenderId:"1089809052880",
+  appId:"1:1089809052880:web:8962d0a02b6e38ab7d5ad5"
+};
+const CENTER=[25.664011,-100.243225], RADIUS=5000;
+const RESIDUOS=["Vidrio","Plástico","Papel y cartón","Metal","Electrónicos","Pilas","Aceite usado","Medicamentos","Llantas","Peligrosos"];
+const TIPOS={"Centro de acopio":"#0f766e","Punto limpio":"#7c3aed","Contenedor público":"#d97706","Tienda con recolección":"#2563eb","Programa municipal":"#be123c","Bote en el campus":"#16a34a","Depósito de basura o residuo especial":"#6b7280"};
+
+/* Sitios publicados. Reemplaza los ejemplos por sitios verificados. */
+const SITIOS=[
+ {nombre:"Centro de Reciclaje (Av. Eloy Cavazos 2051)",tipo:"Centro de acopio",lat:25.6640657,lng:-100.2421459,direccion:"Av. Eloy Cavazos 2051, La Quinta, Guadalupe",horario:"",contacto:"",residuos:[],notas:"Junto al Tec. Residuos y horario por confirmar.",verificado:""},
+ {nombre:"Centro de Reciclaje (Av. Eloy Cavazos 5200)",tipo:"Centro de acopio",lat:25.6525069,lng:-100.2096077,direccion:"Av. Eloy Cavazos 5200, Nuevo Almaguer, Guadalupe",horario:"",contacto:"",residuos:["Electrónicos"],notas:"Tiene entrada para electrónicos. Otros residuos y horario por confirmar.",verificado:""},
+ {nombre:"Centro de Acopio Alen",tipo:"Centro de acopio",lat:25.6501154,lng:-100.2016037,direccion:"Peñón 1236, Campestre La Silla, Guadalupe",horario:"",contacto:"",residuos:[],notas:"Residuos y horario por confirmar; conviene llamar antes.",verificado:""},
+ {nombre:"Reciclables La Roca",tipo:"Centro de acopio",lat:25.6744614,lng:-100.2154022,direccion:"Av. Adolfo López Mateos 107, La Roca, Guadalupe",horario:"",contacto:"81 8360 6405",residuos:[],notas:"Compra reciclables. Residuos y horario por confirmar.",verificado:""}
+];
+
+const KEY="puntosReciclaje";
+let db=null,remotos=[];
+const localGet=()=>{try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){return[]}};
+const extra=()=>db?remotos:localGet();
+const saveExtra=a=>{try{localStorage.setItem(KEY,JSON.stringify(a))}catch(e){}};
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+const map=L.map("map").setView(CENTER,13);
+const ESRI="https://server.arcgisonline.com/ArcGIS/rest/services/";
+L.tileLayer(ESRI+"World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles © Esri, Maxar, Earthstar Geographics"}).addTo(map);
+L.tileLayer(ESRI+"Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",{maxZoom:19}).addTo(map);
+const CampusBtn=L.Control.extend({options:{position:"topleft"},onAdd(){
+  const b=L.DomUtil.create("button","chip");b.type="button";b.textContent="Acercar al campus";
+  b.onclick=ev=>{L.DomEvent.stopPropagation(ev);map.setView(CENTER,18)};
+  return b}});
+new CampusBtn().addTo(map);
+L.circle(CENTER,{radius:RADIUS,color:"#0f766e",weight:2,fillOpacity:.05,dashArray:"6 6"}).addTo(map);
+L.circleMarker(CENTER,{radius:6,color:"#14302b",fillColor:"#fff",fillOpacity:1}).addTo(map).bindTooltip("Tec de Nuevo León");
+const layer=L.layerGroup().addTo(map);
+
+let activo=null;
+const fbox=document.getElementById("filters");
+function chips(){
+  fbox.innerHTML="";
+  [["Todos",null],...RESIDUOS.map(r=>[r,r])].forEach(([t,v])=>{
+    const b=document.createElement("button");b.className="chip";b.textContent=t;
+    b.setAttribute("aria-pressed",String(activo===v));
+    b.onclick=()=>{activo=v;chips();render()};fbox.appendChild(b);
+  });
+}
+function popup(s){
+  return `<strong>${esc(s.nombre)}</strong><br>${esc(s.tipo)}`+
+  (s.direccion?`<br>${esc(s.direccion)}`:"")+(s.horario?`<br>Horario: ${esc(s.horario)}`:"")+
+  (s.contacto?`<br>${esc(s.contacto)}`:"")+`<br>Acepta: ${esc((s.residuos||[]).join(", ")||"por confirmar")}`+
+  (s.notas?`<br><em>${esc(s.notas)}</em>`:"")+(s.verificado?`<br><small>Verificado: ${esc(s.verificado)}</small>`:"");
+}
+function render(){
+  layer.clearLayers();
+  const todos=SITIOS.concat(extra());
+  const vis=todos.filter(s=>!activo||(s.residuos||[]).includes(activo));
+  const list=document.getElementById("list");list.innerHTML="";
+  document.getElementById("count").textContent=vis.length===1?"1 sitio":`${vis.length} sitios`;
+  if(!vis.length){list.innerHTML='<p class="empty">No hay sitios registrados para este residuo todavía.</p>';return}
+  vis.forEach(s=>{
+    const m=L.circleMarker([s.lat,s.lng],{radius:9,color:"#fff",weight:2,fillColor:TIPOS[s.tipo]||"#0f766e",fillOpacity:1}).addTo(layer).bindPopup(popup(s));
+    const d=document.createElement("div");d.className="site";d.tabIndex=0;
+    d.innerHTML=`<h3>${esc(s.nombre)}</h3><small>${esc(s.tipo)}${s.horario?" · "+esc(s.horario):""}</small><div class="tags">${(s.residuos||[]).map(r=>`<span>${esc(r)}</span>`).join("")}</div>`;
+    const go=()=>{map.setView([s.lat,s.lng],16);m.openPopup()};
+    d.onclick=go;d.onkeydown=e=>{if(e.key==="Enter")go()};list.appendChild(d);
+  });
+}
+chips();render();
+if(FIREBASE_CONFIG&&window.firebase){
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);db=firebase.firestore();
+    db.collection("puntos").onSnapshot(q=>{remotos=q.docs.map(d=>d.data());render()},err=>console.error("Firestore:",err));
+    document.getElementById("nota").textContent="Los puntos que agregues serán visibles para todos los visitantes.";
+  }catch(e){console.error(e)}
+}
+
+{
+  const panel=document.getElementById("admin"), addBtn=document.getElementById("addBtn");
+  addBtn.onclick=()=>{
+    const abrir=panel.style.display!=="block";
+    panel.style.display=abrir?"block":"none";
+    addBtn.setAttribute("aria-expanded",String(abrir));
+    if(abrir)panel.scrollIntoView({behavior:"smooth",block:"start"});
+  };
+  const f=document.getElementById("form");
+  f.tipo.innerHTML=Object.keys(TIPOS).map(t=>`<option>${t}</option>`).join("");
+  document.getElementById("checks").innerHTML=RESIDUOS.map(r=>`<label><input type="checkbox" value="${r}">${r}</label>`).join("");
+  f.verificado.value=new Date().toISOString().slice(0,10);
+  let pin=null;
+  map.on("click",e=>{
+    f.coords.value=e.latlng.lat.toFixed(6)+", "+e.latlng.lng.toFixed(6);
+    if(pin)pin.setLatLng(e.latlng);else pin=L.circleMarker(e.latlng,{radius:10,color:"#fff",weight:2,fillColor:"#e11d48",fillOpacity:1}).addTo(map);
+  });
+  f.onsubmit=e=>{
+    e.preventDefault();
+    const [lat,lng]=f.coords.value.split(",").map(Number);
+    const residuos=[...document.querySelectorAll("#checks input:checked")].map(i=>i.value);
+    const p={nombre:f.nombre.value.trim(),tipo:f.tipo.value,lat,lng,direccion:f.direccion.value.trim(),horario:f.horario.value.trim(),contacto:f.contacto.value.trim(),residuos,notas:f.notas.value.trim(),verificado:f.verificado.value};
+    if(db){db.collection("puntos").add(p).catch(err=>alert("No se pudo guardar el punto: "+err.message))}
+    else saveExtra(localGet().concat(p));
+    f.reset();f.verificado.value=new Date().toISOString().slice(0,10);
+    if(pin){map.removeLayer(pin);pin=null}
+    render();
+  };
+  document.getElementById("export").onclick=()=>{
+    const o=document.getElementById("out");o.style.display="block";
+    o.value=JSON.stringify(extra(),null,1);o.select();
+  };
+}
+</script>
+</body>
+</html>

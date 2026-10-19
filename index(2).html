@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dónde reciclar cerca del Tec de Nuevo León</title>
+<script>(function(){var t;try{t=localStorage.getItem("tema")}catch(e){}if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.tema=t})()</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+:root{color-scheme:light;--bg1:#e6f2ff;--bg2:#ccdcff;--text:#431259;--muted:#6f46a6;--card:rgba(255,255,255,.72);--solid:#fff;--border:#b3beff;--chip-bg:rgba(255,255,255,.65);--chip-text:#511f73;--hover:#e6f2ff;--tag-bg:#ccdcff;--tag-text:#511f73;--blob1:#9a99f2;--blob2:#b3beff;--ga:#805ebf;--gb:#60308c;--ca:#8b79d9;--ta:#805ebf;--tb:#60308c;--toast-bg:#431259;--toast-text:#e6f2ff;--shadow:rgba(67,18,89,.55);--del:#60308c;--checked:#6f46a6;--focus:#805ebf}
+:root[data-tema="dark"]{color-scheme:dark;--bg1:#150820;--bg2:#2a0e3d;--text:#e6f2ff;--muted:#b3beff;--card:rgba(67,18,89,.55);--solid:#2a0e3d;--border:#5b3a8c;--chip-bg:rgba(81,31,115,.55);--chip-text:#ccdcff;--hover:rgba(128,94,191,.25);--tag-bg:#511f73;--tag-text:#ccdcff;--blob1:#6f46a6;--blob2:#60308c;--ga:#805ebf;--gb:#60308c;--ca:#805ebf;--ta:#b3beff;--tb:#9a99f2;--toast-bg:#e6f2ff;--toast-text:#431259;--shadow:rgba(0,0,0,.7);--del:#b3beff;--checked:#805ebf;--focus:#b3beff}
+*{box-sizing:border-box}
+body{margin:0;color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(180deg,var(--bg1),var(--bg2) 55%,var(--bg1));min-height:100vh;overflow-x:hidden}
+h1,h2{font-family:"Bricolage Grotesque",system-ui,sans-serif;margin:0;line-height:1.1}
+.blob{position:fixed;border-radius:50%;filter:blur(70px);opacity:.45;z-index:-1;animation:float 14s ease-in-out infinite alternate}
+.b1{width:420px;height:420px;background:var(--blob1);top:-120px;right:-100px}
+.b2{width:360px;height:360px;background:var(--blob2);bottom:-100px;left:-80px;animation-delay:-6s}
+@keyframes float{to{transform:translate(-40px,50px) scale(1.15)}}
+.top{position:fixed;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;z-index:2000;pointer-events:none}
+.top>*{pointer-events:auto}
+.pill{border:1px solid var(--border);background:var(--card);backdrop-filter:blur(10px);color:var(--text);border-radius:999px;padding:8px 16px;font:inherit;font-size:.9rem;text-decoration:none;cursor:pointer;transition:transform .2s}
+.pill:hover{transform:translateY(-2px)}
+.tema{width:42px;height:42px;padding:0;font-size:1.1rem}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+.hero{padding-top:78px;padding-bottom:18px;animation:rise .7s both}
+h1{font-size:clamp(1.9rem,5vw,3.2rem);font-weight:700;max-width:18ch}
+h1 span{background:linear-gradient(90deg,var(--ta),var(--tb));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{margin:12px 0 0;color:var(--muted);max-width:55ch}
+.filters{display:flex;flex-wrap:wrap;gap:8px;padding-bottom:14px;animation:rise .7s .1s both}
+.chip{border:1px solid var(--border);background:var(--chip-bg);color:var(--chip-text);border-radius:999px;padding:7px 15px;font:inherit;font-size:.9rem;cursor:pointer;transition:transform .2s,background .2s,box-shadow .2s}
+.chip:hover{transform:translateY(-2px);box-shadow:0 8px 18px -10px var(--shadow)}
+.chip[aria-pressed="true"]{background:linear-gradient(135deg,var(--ga),var(--gb));color:#fff;border-color:transparent}
+.actions{padding-bottom:18px;animation:rise .7s .2s both}
+.cta{border:0;border-radius:999px;padding:12px 24px;font:inherit;font-weight:600;color:#fff;cursor:pointer;background:linear-gradient(135deg,var(--ca),var(--gb));box-shadow:0 14px 28px -14px var(--shadow);transition:transform .2s,box-shadow .2s}
+.cta:hover{transform:translateY(-3px);box-shadow:0 20px 32px -14px var(--shadow)}
+.cta:active{transform:scale(.97)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+main{display:grid;grid-template-columns:1fr 380px;gap:18px;padding-bottom:40px;animation:rise .8s .3s both}
+#map{height:72vh;min-height:440px;border-radius:22px;box-shadow:0 24px 50px -24px var(--shadow);border:1px solid var(--border)}
+aside{background:var(--card);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:22px;padding:18px;max-height:72vh;overflow:auto;box-shadow:0 24px 50px -30px var(--shadow)}
+aside h2{font-size:1.2rem;margin-bottom:10px}
+.vista{animation:fade .4s both}
+.site{padding:12px;border-radius:14px;cursor:pointer;transition:background .2s,transform .2s;animation:rise .5s both;animation-delay:calc(var(--i)*60ms)}
+.site:hover{background:var(--hover);transform:translateX(4px)}
+.site h3{margin:0;font-size:1rem}
+.site small{color:var(--muted);display:block}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.tags span{background:var(--tag-bg);color:var(--tag-text);border-radius:8px;padding:1px 9px;font-size:.78rem}
+.empty{color:var(--muted)}
+.mini,.del{border:0;background:none;color:var(--del);font:inherit;font-size:.82rem;text-decoration:underline;cursor:pointer;padding:4px 0}
+.del{display:block;margin-top:6px}
+.mini:hover,.del:hover{color:#e0457b}
+.pinwrap{background:none;border:0}
+.pin{display:block;width:20px;height:20px;border-radius:50%;background:var(--c);border:3px solid #fff;box-shadow:0 3px 10px rgba(67,18,89,.55);position:relative;animation:pop .5s cubic-bezier(.34,1.56,.64,1) both;animation-delay:calc(var(--i,0)*70ms)}
+.pin::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:2px solid #fff;opacity:0;animation:ring 2.4s ease-out infinite}
+.pin.sel{width:26px;height:26px;--c:#431259}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes ring{0%{transform:scale(1);opacity:.8}100%{transform:scale(2.7);opacity:0}}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--solid);color:var(--text)}
+.leaflet-popup-content-wrapper{border-radius:16px}
+:root[data-tema="dark"] .leaflet-bar a{background:#2a0e3d;color:#e6f2ff;border-color:#511f73}
+.pp{display:grid;gap:2px;font-size:.9rem}
+.pp strong{font-size:1rem}.pp .t{color:var(--muted)}.pp p{margin:0}.pp .n{font-style:italic}
+.campus{border:0;border-radius:999px;padding:8px 14px;font:inherit;font-size:.85rem;font-weight:600;color:#fff;background:#60308c;cursor:pointer;box-shadow:0 6px 14px -6px #431259}
+form{display:grid;gap:12px}
+label{display:block;font-size:.85rem;font-weight:600;color:var(--chip-text)}
+input,select,textarea{width:100%;margin-top:4px;font:inherit;padding:9px 11px;border:1px solid var(--border);border-radius:12px;background:var(--solid);color:var(--text);transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--focus);box-shadow:0 0 0 3px rgba(128,94,191,.3)}
+.checks{display:flex;flex-wrap:wrap;gap:6px}
+.checks label{font-weight:400;margin:0}
+.checks input{position:absolute;opacity:0;width:0}
+.checks span{display:inline-block;padding:4px 12px;border:1px solid var(--border);border-radius:999px;cursor:pointer;font-size:.85rem;transition:background .2s,color .2s}
+.checks input:checked+span{background:var(--checked);color:#fff;border-color:var(--checked)}
+.checks input:focus-visible+span{outline:3px solid var(--focus)}
+.row{display:flex;gap:8px;align-items:center}
+.cta.sm{padding:10px 20px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);background:var(--toast-bg);color:var(--toast-text);padding:11px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:.35s;z-index:3000}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media(max-width:860px){main{grid-template-columns:1fr}#map{height:55vh}aside{max-height:none}}
+@media(prefers-reduced-motion:reduce){*,*::after{animation:none!important;transition:none!important}}
+[hidden]{display:none!important}
+.mini:hover,.del:hover{color:var(--focus)}
+.ed{display:block;margin-top:6px}
+.prev{margin-top:8px;display:flex;gap:10px;align-items:center}
+.prev img{width:96px;height:72px;object-fit:cover;border-radius:12px;border:1px solid var(--border)}
+.btn2{border:1px solid #e0457b;background:none;color:#e0457b;border-radius:999px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer;transition:background .2s,color .2s}
+.btn2:hover{background:#e0457b;color:#fff}
+.pp img{display:block;width:100%;max-width:210px;height:112px;object-fit:cover;border-radius:12px;margin-bottom:6px}
+input[type=file]{padding:7px}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div>
+<nav class="top"><a class="pill" id="homeLink" href="#">← Inicio</a><button class="pill tema" id="tema" type="button"></button></nav>
+<header class="wrap hero">
+  <h1>Dónde reciclar cerca del <span>Tec de Nuevo León</span></h1>
+  <p>Centros de acopio, puntos limpios y botes de reciclaje en un radio de 5 km. Elige un residuo para ver dónde llevarlo.</p>
+</header>
+<div class="wrap filters" id="filters" role="group" aria-label="Filtrar por residuo"></div>
+<div class="wrap actions"><button class="cta" id="addBtn" type="button">+ Agregar un punto de reciclaje o basura</button></div>
+<main class="wrap">
+  <div id="map" role="application" aria-label="Mapa satelital de sitios de reciclaje"></div>
+  <aside>
+    <div id="vistaLista" class="vista" aria-live="polite"><h2 id="count"></h2><div id="list"></div></div>
+    <div id="vistaForm" class="vista" hidden>
+      <h2 id="formTitulo">Agregar un punto</h2>
+      <p class="empty" id="nota">Haz clic en el mapa donde está el sitio y llena los datos.</p>
+      <form id="form">
+        <label>Nombre<input name="nombre" required maxlength="90"></label>
+        <label>Tipo<select name="tipo"></select></label>
+        <label>Ubicación (clic en el mapa)<input name="coords" readonly required placeholder="Aún sin ubicación"></label>
+        <label>Dirección o referencia<input name="direccion" placeholder="Ej. junto a la biblioteca"></label>
+        <label>Horario<input name="horario"></label>
+        <label>Teléfono o sitio web<input name="contacto"></label>
+        <div><label>Residuos que acepta</label><div class="checks" id="checks"></div></div>
+        <label>Notas<textarea name="notas" rows="2"></textarea></label>
+        <label>Última verificación<input type="date" name="verificado"></label>
+        <div>
+          <label for="foto">Imagen de referencia (opcional)</label>
+          <input type="file" id="foto" accept="image/*">
+          <div class="prev" id="prev" hidden><img alt="Vista previa de la imagen"><button type="button" class="mini" id="quitarFoto">Quitar imagen</button></div>
+        </div>
+        <div class="row"><button class="cta sm" type="submit" id="guardar">Guardar punto</button><button class="btn2" type="button" id="eliminar" hidden>Eliminar punto</button></div>
+      </form>
+    </div>
+  </aside>
+</main>
+<div id="toast" role="status"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyCy0EFgApvFkZE94yaKyc5rhGL6xtJIL4o",
+  authDomain:"desarrollo-sustentable-52b32.firebaseapp.com",
+  projectId:"desarrollo-sustentable-52b32",
+  storageBucket:"desarrollo-sustentable-52b32.firebasestorage.app",
+  messagingSenderId:"1089809052880",
+  appId:"1:1089809052880:web:8962d0a02b6e38ab7d5ad5"
+};
+const CENTER=[25.664011,-100.243225], RADIUS=5000;
+const RESIDUOS=["Vidrio","Plástico","Papel y cartón","Metal","Electrónicos","Pilas","Aceite usado","Medicamentos","Llantas","Peligrosos"];
+const TIPOS={"Centro de acopio":"#805ebf","Punto limpio":"#60308c","Contenedor público":"#9a99f2","Tienda con recolección":"#8b79d9","Programa municipal":"#511f73","Bote en el campus":"#6f46a6","Depósito de basura o residuo especial":"#431259"};
+
+const SITIOS=[
+ {nombre:"Centro de Reciclaje (Av. Eloy Cavazos 2051)",tipo:"Centro de acopio",lat:25.6640657,lng:-100.2421459,direccion:"Av. Eloy Cavazos 2051, La Quinta, Guadalupe",horario:"",contacto:"",residuos:[],notas:"Junto al Tec. Residuos y horario por confirmar.",verificado:""},
+ {nombre:"Centro de Reciclaje (Av. Eloy Cavazos 5200)",tipo:"Centro de acopio",lat:25.6525069,lng:-100.2096077,direccion:"Av. Eloy Cavazos 5200, Nuevo Almaguer, Guadalupe",horario:"",contacto:"",residuos:["Electrónicos"],notas:"Tiene entrada para electrónicos. Otros residuos y horario por confirmar.",verificado:""},
+ {nombre:"Centro de Acopio Alen",tipo:"Centro de acopio",lat:25.6501154,lng:-100.2016037,direccion:"Peñón 1236, Campestre La Silla, Guadalupe",horario:"",contacto:"",residuos:[],notas:"Residuos y horario por confirmar; conviene llamar antes.",verificado:""},
+ {nombre:"Reciclables La Roca",tipo:"Centro de acopio",lat:25.6744614,lng:-100.2154022,direccion:"Av. Adolfo López Mateos 107, La Roca, Guadalupe",horario:"",contacto:"81 8360 6405",residuos:[],notas:"Compra reciclables. Residuos y horario por confirmar.",verificado:""}
+];
+
+const $=id=>document.getElementById(id);
+const KEY="puntosReciclaje";
+let db=null,remotos=[],activo=null,pin=null,agregando=false,editando=null,foto="";
+const localGet=()=>{try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){return[]}};
+const saveExtra=a=>{try{localStorage.setItem(KEY,JSON.stringify(a));return true}catch(e){return false}};
+
+/* Lista final: sitios base + puntos agregados. Una edición de un sitio base se guarda como copia con "reemplaza". */
+function todos(){
+  const ex=db?remotos.map(p=>({...p,_src:"db"})):localGet().map((p,i)=>({...p,_src:"local",_i:i}));
+  const ov=new Map(ex.filter(p=>Number.isInteger(p.reemplaza)).map(p=>[p.reemplaza,p]));
+  const out=[];
+  SITIOS.forEach((s,i)=>{const o=ov.get(i);if(!o)out.push({...s,_src:"base",_b:i});else if(!o.oculto)out.push(o)});
+  return out.concat(ex.filter(p=>!Number.isInteger(p.reemplaza)));
+}
+let tt;const toast=m=>{const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),2600)};
+const icon=(c,i,cls="")=>L.divIcon({className:"pinwrap",html:`<span class="pin ${cls}" style="--c:${c};--i:${i}"></span>`,iconSize:[24,24],iconAnchor:[12,12],popupAnchor:[0,-12]});
+
+/* Mapa satelital con nombres */
+const map=L.map("map").setView(CENTER,13);
+const ESRI="https://server.arcgisonline.com/ArcGIS/rest/services/";
+L.tileLayer(ESRI+"World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles © Esri, Maxar, Earthstar Geographics"}).addTo(map);
+L.tileLayer(ESRI+"Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",{maxZoom:19}).addTo(map);
+L.circle(CENTER,{radius:RADIUS,color:"#e6f2ff",weight:2,fillColor:"#9a99f2",fillOpacity:.12,dashArray:"8 8"}).addTo(map);
+L.marker(CENTER,{icon:icon("#e6f2ff",0),interactive:false}).addTo(map);
+const CampusBtn=L.Control.extend({options:{position:"topleft"},onAdd(){
+  const b=L.DomUtil.create("button","campus");b.type="button";b.textContent="Acercar al campus";
+  L.DomEvent.disableClickPropagation(b);b.onclick=()=>map.flyTo(CENTER,18,{duration:1.4});return b}});
+new CampusBtn().addTo(map);
+const layer=L.layerGroup().addTo(map);
+
+function chips(){
+  const fb=$("filters");fb.innerHTML="";
+  [["Todos",null],...RESIDUOS.map(r=>[r,r])].forEach(([t,v])=>{
+    const b=document.createElement("button");b.className="chip";b.type="button";b.textContent=t;
+    b.setAttribute("aria-pressed",String(activo===v));
+    b.onclick=()=>{activo=v;chips();render()};fb.appendChild(b);
+  });
+}
+function el(tag,txt,cls){const e=document.createElement(tag);if(txt)e.textContent=txt;if(cls)e.className=cls;return e}
+function popupNode(s){
+  const d=el("div","","pp");
+  if(s.foto){const im=document.createElement("img");im.src=s.foto;im.alt="Imagen de referencia de "+s.nombre;d.append(im)}
+  d.append(el("strong",s.nombre),el("span",s.tipo,"t"));
+  if(s.direccion)d.append(el("p",s.direccion));
+  if(s.horario)d.append(el("p","Horario: "+s.horario));
+  if(s.contacto)d.append(el("p",s.contacto));
+  d.append(el("p","Acepta: "+((s.residuos||[]).join(", ")||"por confirmar")));
+  if(s.notas)d.append(el("p",s.notas,"n"));
+  if(s.verificado)d.append(el("small","Verificado: "+s.verificado));
+  const b=el("button","Editar","mini ed");b.type="button";b.onclick=()=>{map.closePopup();abrirEdicion(s)};d.append(b);
+  return d;
+}
+function render(){
+  layer.clearLayers();
+  const vis=todos().filter(s=>!activo||(s.residuos||[]).includes(activo));
+  const list=$("list");list.innerHTML="";
+  $("count").textContent=vis.length===1?"1 sitio":`${vis.length} sitios`;
+  if(!vis.length){list.append(el("p","No hay sitios registrados para este residuo todavía.","empty"));return}
+  vis.forEach((s,i)=>{
+    const m=L.marker([s.lat,s.lng],{icon:icon(TIPOS[s.tipo]||"#805ebf",i)}).addTo(layer).bindPopup(popupNode(s));
+    const d=el("div","","site");d.tabIndex=0;d.style.setProperty("--i",i);
+    d.append(el("h3",s.nombre),el("small",s.tipo+(s.horario?" · "+s.horario:"")));
+    const tg=el("div","","tags");(s.residuos||[]).forEach(r=>tg.append(el("span",r)));d.append(tg);
+    const b=el("button","Editar","mini ed");b.type="button";b.onclick=e=>{e.stopPropagation();abrirEdicion(s)};d.append(b);
+    const go=()=>{map.flyTo([s.lat,s.lng],17,{duration:1.2});setTimeout(()=>m.openPopup(),1200)};
+    d.onclick=go;d.onkeydown=e=>{if(e.key==="Enter"&&e.target===d)go()};list.append(d);
+  });
+}
+chips();render();
+
+if(FIREBASE_CONFIG&&window.firebase){
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);db=firebase.firestore();
+    db.collection("puntos").onSnapshot(q=>{remotos=q.docs.map(d=>({...d.data(),id:d.id}));render()},err=>console.error("Firestore:",err));
+    $("nota").textContent="Haz clic en el mapa donde está el sitio y llena los datos. Los cambios serán visibles para todos.";
+  }catch(e){console.error(e)}
+}
+
+/* Guardar / borrar */
+async function guardarPunto(p,s){
+  const datos={...p};
+  if(s&&s._src==="base")datos.reemplaza=s._b;
+  else if(s&&Number.isInteger(s.reemplaza))datos.reemplaza=s.reemplaza;
+  if(db){
+    if(s&&s._src==="db")await db.collection("puntos").doc(s.id).set(datos);
+    else await db.collection("puntos").add(datos);
+  }else{
+    const a=localGet();
+    if(s&&s._src==="local")a[s._i]=datos;else a.push(datos);
+    if(!saveExtra(a))throw new Error("el almacenamiento del navegador está lleno");
+    render();
+  }
+}
+async function borrar(s){
+  if(!confirm(`¿Eliminar «${s.nombre}»?`))return;
+  try{
+    if(s._src==="base")await guardarPunto({nombre:s.nombre,tipo:s.tipo,lat:s.lat,lng:s.lng,oculto:true},s);
+    else if(Number.isInteger(s.reemplaza)){const {id,_src,_i,...resto}=s;await guardarPunto({...resto,oculto:true},s)}
+    else if(s._src==="db")await db.collection("puntos").doc(s.id).delete();
+    else{const a=localGet();a.splice(s._i,1);saveExtra(a);render()}
+    vista(false);toast("Punto eliminado");
+  }catch(e){toast("No se pudo eliminar: "+e.message)}
+}
+
+/* Formulario (agregar y editar) */
+const f=$("form"),hoy=()=>new Date().toISOString().slice(0,10);
+f.tipo.innerHTML=Object.keys(TIPOS).map(t=>`<option>${t}</option>`).join("");
+$("checks").innerHTML=RESIDUOS.map(r=>`<label><input type="checkbox" value="${r}"><span>${r}</span></label>`).join("");
+function mostrarFoto(){$("prev").hidden=!foto;if(foto)$("prev").querySelector("img").src=foto;$("foto").value=""}
+function resetForm(){f.reset();f.verificado.value=hoy();foto="";mostrarFoto()}
+resetForm();
+function colocarPin(lat,lng){if(pin)pin.setLatLng([lat,lng]);else pin=L.marker([lat,lng],{icon:icon("#431259",0,"sel")}).addTo(map)}
+function vista(form){
+  $("vistaForm").hidden=!form;$("vistaLista").hidden=form;agregando=form;
+  $("addBtn").textContent=form?"Cancelar":"+ Agregar un punto de reciclaje o basura";
+  if(!form){if(pin){map.removeLayer(pin);pin=null}editando=null;resetForm()}
+  else document.querySelector("aside").scrollTop=0;
+  $("formTitulo").textContent=editando?"Editar punto":"Agregar un punto";
+  $("guardar").textContent=editando?"Guardar cambios":"Guardar punto";
+  $("eliminar").hidden=!editando;
+}
+$("addBtn").onclick=()=>vista(!agregando);
+function abrirEdicion(s){
+  editando=s;vista(true);
+  f.nombre.value=s.nombre||"";f.tipo.value=s.tipo;f.coords.value=s.lat.toFixed(6)+", "+s.lng.toFixed(6);
+  f.direccion.value=s.direccion||"";f.horario.value=s.horario||"";f.contacto.value=s.contacto||"";f.notas.value=s.notas||"";f.verificado.value=s.verificado||hoy();
+  document.querySelectorAll("#checks input").forEach(i=>i.checked=(s.residuos||[]).includes(i.value));
+  foto=s.foto||"";mostrarFoto();colocarPin(s.lat,s.lng);map.flyTo([s.lat,s.lng],17,{duration:1});
+}
+map.on("click",e=>{
+  if(!agregando)return;
+  f.coords.value=e.latlng.lat.toFixed(6)+", "+e.latlng.lng.toFixed(6);
+  colocarPin(e.latlng.lat,e.latlng.lng);
+});
+$("eliminar").onclick=()=>borrar(editando);
+
+/* Imagen de referencia: se reduce y comprime antes de guardarla */
+function comprimir(file){return new Promise((ok,no)=>{
+  const url=URL.createObjectURL(file),img=new Image();
+  img.onload=()=>{
+    const k=Math.min(1,800/Math.max(img.width,img.height)),c=document.createElement("canvas");
+    c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+    c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
+    let q=.75,d=c.toDataURL("image/jpeg",q);
+    while(d.length>250000&&q>.35){q-=.1;d=c.toDataURL("image/jpeg",q)}
+    d.length>250000?no(new Error("grande")):ok(d)};
+  img.onerror=()=>no(new Error("formato"));img.src=url})}
+$("foto").onchange=async e=>{
+  const file=e.target.files[0];if(!file)return;
+  try{foto=await comprimir(file);mostrarFoto()}catch(err){toast("No se pudo cargar esa imagen")}
+};
+$("quitarFoto").onclick=()=>{foto="";mostrarFoto()};
+
+f.onsubmit=async e=>{
+  e.preventDefault();
+  const [lat,lng]=f.coords.value.split(",").map(Number);
+  if(isNaN(lat)||isNaN(lng)){toast("Marca la ubicación en el mapa");return}
+  const p={nombre:f.nombre.value.trim(),tipo:f.tipo.value,lat,lng,direccion:f.direccion.value.trim(),horario:f.horario.value.trim(),contacto:f.contacto.value.trim(),residuos:[...document.querySelectorAll("#checks input:checked")].map(i=>i.value),notas:f.notas.value.trim(),verificado:f.verificado.value,foto};
+  const msg=editando?"Cambios guardados":"Punto agregado";
+  try{
+    await guardarPunto(p,editando);
+    vista(false);map.flyTo([lat,lng],17,{duration:1.2});toast(msg);
+  }catch(err){toast("No se pudo guardar: "+err.message)}
+};
+
+/* Tema claro/oscuro (se comparte con las demás páginas del mismo sitio) */
+const HOME_URL="https://arekkusu2220.github.io/";
+$("homeLink").href=HOME_URL;
+const root=document.documentElement,tb=$("tema");
+function aplicarTema(t){root.dataset.tema=t;tb.textContent=t==="dark"?"☀":"☾";tb.setAttribute("aria-label",t==="dark"?"Cambiar a modo claro":"Cambiar a modo oscuro")}
+aplicarTema(root.dataset.tema||"light");
+tb.onclick=()=>{const t=root.dataset.tema==="dark"?"light":"dark";aplicarTema(t);try{localStorage.setItem("tema",t)}catch(e){}};
+</script>
+</body>
+</html>
